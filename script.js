@@ -1,18 +1,27 @@
-const api = "e5df2bc660284105aa38d6dd94320864";
+const apiKey = "e5df2bc660284105aa38d6dd94320864";
 
 const newsContainer = document.getElementById("news-container");
 const loader = document.querySelector(".loader");
 const categoryButtons = document.querySelectorAll(".categories button");
 
 async function fetchNews(url) {
-    loader.style.display = "block";       
-    newsContainer.innerHTML = "";         
+    loader.style.display = "block";
+    newsContainer.innerHTML = "";
 
     try {
         const res = await fetch(url);
+
+        if (!res.ok) {
+            throw new Error(`API Error: ${res.status} ${res.statusText}`);
+        }
+
         const data = await res.json();
 
-        if (data.articles.length === 0) {
+        if (data.status !== "ok") {
+            throw new Error(data.message || "News API error");
+        }
+
+        if (!data.articles || data.articles.length === 0) {
             newsContainer.innerHTML = `<p>No news found for this category.</p>`;
             return;
         }
@@ -20,64 +29,61 @@ async function fetchNews(url) {
         displayNews(data.articles);
 
     } catch (error) {
-        console.log(error);
-        newsContainer.innerHTML = `<p>Unable to fetch news. Try again later.</p>`;
+        console.error("Fetch Error:", error.message);
+        newsContainer.innerHTML = `
+            <p style="color:red; text-align:center;">
+                Unable to fetch news. (${error.message})
+            </p>
+        `;
     } finally {
-        loader.style.display = "none";    
+        loader.style.display = "none";
     }
 }
 
 function displayNews(articles) {
-    articles.forEach(element => {
+    newsContainer.innerHTML = "";
 
-        const articlesDiv = document.createElement("div");
-        articlesDiv.classList.add("news-card");
+    articles.forEach(article => {
+        const articleDiv = document.createElement("div");
+        articleDiv.className = "news-card";
 
-        const newsimage = document.createElement("img");
-        newsimage.src = element.urlToImage || "https://via.placeholder.com/400x200";
-        newsimage.alt = "news-image";
-        articlesDiv.appendChild(newsimage);
+        const img = document.createElement("img");
+        img.src = article.urlToImage || "https://via.placeholder.com/400x200";
+        img.alt = "news image";
 
-        const contentDiv = document.createElement("div");
-        contentDiv.classList.add("news-content");
-        contentDiv.style.padding = "15px";
+        const content = document.createElement("div");
+        content.className = "news-content";
 
-        const heading = document.createElement("h3");
-        heading.classList.add("title");
-        heading.innerText = element.title;
-        contentDiv.append(heading);
+        const title = document.createElement("h3");
+        title.textContent = article.title || "No title";
 
-        const description = document.createElement("p");
-        description.classList.add("description");
-        description.innerText = element.description || "No description available.";
-        contentDiv.append(description);
+        const desc = document.createElement("p");
+        desc.textContent = article.description || "No description available.";
 
-        const publishedAt = document.createElement("span");
-        publishedAt.classList.add("publishedAt");
-        publishedAt.innerText = new Date(element.publishedAt).toLocaleString();
-        contentDiv.append(publishedAt);
+        const date = document.createElement("span");
+        date.textContent = article.publishedAt
+            ? new Date(article.publishedAt).toLocaleString()
+            : "";
 
-        articlesDiv.append(contentDiv);
-        newsContainer.append(articlesDiv);
+        content.append(title, desc, date);
+        articleDiv.append(img, content);
+        newsContainer.appendChild(articleDiv);
     });
 }
 
 categoryButtons.forEach(button => {
     button.addEventListener("click", () => {
-
         categoryButtons.forEach(btn => btn.classList.remove("active"));
-
         button.classList.add("active");
 
         const category = button.innerText.toLowerCase();
-        const url = `https://newsapi.org/v2/top-headlines?country=us&category=${category}&apiKey=${api}`;
+        const url = `https://newsapi.org/v2/top-headlines?country=us&category=${category}&apiKey=${apiKey}`;
         fetchNews(url);
     });
 });
 
-
-window.onload = () => {
+window.addEventListener("load", () => {
     const defaultCategory = "technology";
-    const url = `https://newsapi.org/v2/top-headlines?country=us&category=${defaultCategory}&apiKey=${api}`;
+    const url = `https://newsapi.org/v2/top-headlines?country=us&category=${defaultCategory}&apiKey=${apiKey}`;
     fetchNews(url);
-};
+});
