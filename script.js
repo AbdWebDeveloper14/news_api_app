@@ -1,10 +1,23 @@
-const apiKey = "23a34053b13480d273137b214670d2be"; // GNews API Key
+// ======== API KEY ========
+const apiKey = "9CqFbN2o6lWyZxjNPiO8VN5zrSg8CWGlFd9h6MCX7Wg2xFX9"; // Currents API Key
 
+// ======== DOM ELEMENTS ========
 const newsContainer = document.getElementById("news-container");
 const loader = document.querySelector(".loader");
 const categoryButtons = document.querySelectorAll(".categories button");
 
-// 1. Fetch function updated for GNews structure
+// ======== CATEGORY MAP ========
+const categoryMap = {
+    Technology: "technology",
+    Sports: "sports",
+    Business: "business",
+    Health: "health",
+    Entertainment: "entertainment",
+    Science: "science",
+    General: "all"
+};
+
+// ======== FETCH NEWS FUNCTION ========
 async function fetchNews(url) {
     if (loader) loader.style.display = "block";
     newsContainer.innerHTML = "";
@@ -13,19 +26,17 @@ async function fetchNews(url) {
         const res = await fetch(url);
         const data = await res.json();
 
-        // GNews 403 error handle karne ke liye
-        if (!res.ok) {
-            const errorMessage = data.errors ? data.errors[0] : `Error ${res.status}`;
-            throw new Error(errorMessage);
+        // Check for errors
+        if (!res.ok || !data.news) {
+            throw new Error(data.message || `Error ${res.status}`);
         }
 
-        // GNews mein status: "ok" nahi hota, direct articles hote hain
-        if (!data.articles || data.articles.length === 0) {
+        if (data.news.length === 0) {
             newsContainer.innerHTML = `<p style="text-align:center;">No news found for this category.</p>`;
             return;
         }
 
-        displayNews(data.articles);
+        displayNews(data.news);
 
     } catch (error) {
         console.error("Fetch Error:", error.message);
@@ -33,7 +44,7 @@ async function fetchNews(url) {
             <div style="color:red; text-align:center; padding: 20px;">
                 <h3>Unable to fetch news</h3>
                 <p>Reason: ${error.message}</p>
-                <small>Check if your GNews API key is verified via email.</small>
+                <small>Check if your API key is correct and Currents API is working.</small>
             </div>
         `;
     } finally {
@@ -41,7 +52,7 @@ async function fetchNews(url) {
     }
 }
 
-// 2. Display function updated for GNews property names
+// ======== DISPLAY NEWS ========
 function displayNews(articles) {
     newsContainer.innerHTML = "";
 
@@ -49,10 +60,11 @@ function displayNews(articles) {
         const articleDiv = document.createElement("div");
         articleDiv.className = "news-card";
 
-        // GNews use 'image' instead of 'urlToImage'
         const img = document.createElement("img");
         img.src = article.image || "https://via.placeholder.com/400x200?text=No+Image+Available";
         img.alt = "news image";
+        img.style.width = "100%";
+        img.style.borderRadius = "5px";
 
         const content = document.createElement("div");
         content.className = "news-content";
@@ -61,7 +73,6 @@ function displayNews(articles) {
         title.textContent = article.title || "No title available";
 
         const desc = document.createElement("p");
-        // GNews provides description
         desc.textContent = article.description || "No description available.";
 
         const date = document.createElement("span");
@@ -69,9 +80,7 @@ function displayNews(articles) {
         date.style.marginTop = "10px";
         date.style.fontSize = "0.8rem";
         date.style.color = "#777";
-        date.textContent = article.publishedAt
-            ? new Date(article.publishedAt).toLocaleString()
-            : "";
+        date.textContent = article.published || "";
 
         const link = document.createElement("a");
         link.href = article.url;
@@ -83,26 +92,31 @@ function displayNews(articles) {
 
         content.append(title, desc, date, link);
         articleDiv.append(img, content);
+        articleDiv.style.background = "#fff";
+        articleDiv.style.padding = "15px";
+        articleDiv.style.margin = "15px";
+        articleDiv.style.borderRadius = "10px";
+        articleDiv.style.boxShadow = "0 2px 5px rgba(0,0,0,0.1)";
+
         newsContainer.appendChild(articleDiv);
     });
 }
 
-// 3. Category Click Event
+// ======== CATEGORY BUTTON CLICK ========
 categoryButtons.forEach(button => {
     button.addEventListener("click", () => {
         categoryButtons.forEach(btn => btn.classList.remove("active"));
         button.classList.add("active");
 
-        const category = button.innerText.toLowerCase();
-        // GNews categories: general, world, nation, business, technology, entertainment, sports, science, health
-        const url = `https://gnews.io/api/v4/top-headlines?category=${category}&lang=en&country=us&max=10&apikey=${apiKey}`;
+        const category = categoryMap[button.innerText] || "all";
+
+        const url = `https://api.currentsapi.services/v1/latest-news?apiKey=${apiKey}&category=${category}&language=en`;
         fetchNews(url);
     });
 });
 
-// 4. Initial Load
+// ======== LOAD DEFAULT NEWS ========
 window.addEventListener("load", () => {
-    const defaultCategory = "general"; // 'general' is safer for first load
-    const url = `https://gnews.io/api/v4/top-headlines?category=${defaultCategory}&lang=en&country=us&max=10&apikey=${apiKey}`;
+    const url = `https://api.currentsapi.services/v1/latest-news?apiKey=${apiKey}&category=all&language=en`;
     fetchNews(url);
 });
