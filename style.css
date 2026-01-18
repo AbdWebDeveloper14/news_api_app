@@ -1,0 +1,145 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background: #f4f6f9;
+  color: #333;
+}
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, #1d2671, #c33764);
+  color: #fff;
+  padding: 30px 20px;
+  text-align: center;
+}
+
+.loader {
+    text-align: center;
+    margin: 20px 0;
+    font-size: 0.9rem;
+    color: #666;
+    display: none; /* default hidden */
+}
+
+/* Optional spinner */
+.loader::after {
+    content: "";
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 3px solid #c33764;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin-left: 8px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+
+.header h1 {
+  font-size: 2rem;
+  margin-bottom: 5px;
+}
+
+.header p {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+/* Categories */
+.categories {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px;
+  flex-wrap: wrap;
+}
+
+.categories button {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 20px;
+  background: #e0e0e0;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+}
+
+.categories button:hover {
+  background: #c33764;
+  color: #fff;
+}
+
+.categories .active {
+  background: #1d2671;
+  color: #fff;
+}
+
+/* Loader */
+.loader {
+  text-align: center;
+  margin: 20px 0;
+  font-size: 0.9rem;
+  color: #666;
+  display: none;
+}
+
+/* News Container */
+.news-container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* News Card */
+.news-card {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  transition: transform 0.3s ease;
+  cursor: pointer;
+}
+
+.news-card:hover {
+  transform: translateY(-5px);
+}
+
+.news-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.news-content {
+  padding: 15px !important;
+}
+
+.news-content .title {
+  font-size: 1rem;
+  margin-bottom: 8px;
+  color: #1d2671;
+}
+
+.news-content p {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin-bottom: 10px;
+  color: #555;
+}
+
+.news-content span {
+  font-size: 0.75rem;
+  color: #888;
+}
